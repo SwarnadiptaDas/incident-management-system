@@ -3,80 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Submission: Swarnadipta Das - Infrastructure / SRE Intern Assignment</title>
+    <title>SRE Assignment Submission: Sentinel-IMS</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 40px auto; padding: 0 20px; }
-        h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
-        h2 { color: #2980b9; margin-top: 30px; }
-        .highlight { background: #f1f8ff; border-left: 4px solid #3498db; padding: 15px; margin: 20px 0; }
-        code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; font-family: 'Courier New', Courier, monospace; }
-        pre { background: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 0.9em; }
-        .footer { margin-top: 50px; font-size: 0.8em; color: #7f8c8d; text-align: center; border-top: 1px solid #eee; padding-top: 20px; }
-        .link { color: #3498db; font-weight: bold; text-decoration: none; }
-        .badge { display: inline-block; background: #e74c3c; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; }
+        :root {
+            --primary: #2563eb;
+            --secondary: #1e293b;
+            --accent: #0ea5e9;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #334155;
+        }
+        body { font-family: 'Inter', system-ui, sans-serif; line-height: 1.6; color: var(--text); background: var(--bg); max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 50px; padding-bottom: 30px; border-bottom: 2px solid #e2e8f0; }
+        h1 { color: var(--secondary); font-size: 2.5rem; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.025em; }
+        .candidate-info { display: flex; justify-content: center; gap: 40px; color: var(--primary); font-weight: 600; margin-bottom: 20px; }
+        .repo-link { display: inline-block; background: var(--secondary); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 700; transition: transform 0.2s; }
+        .repo-link:hover { transform: translateY(-2px); }
+        h2 { color: var(--secondary); font-size: 1.5rem; margin-top: 40px; border-left: 4px solid var(--primary); padding-left: 15px; }
+        .pillar-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin: 30px 0; }
+        .pillar-card { background: var(--card); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); border: 1px solid #f1f5f9; }
+        .pillar-card h3 { color: var(--primary); margin-top: 0; font-size: 1.1rem; }
+        pre { background: var(--secondary); color: #e2e8f0; padding: 20px; border-radius: 8px; font-size: 0.85rem; overflow-x: auto; line-height: 1.4; }
+        .badge { background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .footer { margin-top: 60px; padding-top: 30px; border-top: 1px solid #e2e8f0; text-align: center; color: #94a3b8; font-size: 0.9rem; }
+        @media print {
+            body { background: white; padding: 20px; }
+            .pillar-card { border: 1px solid #eee; box-shadow: none; }
+        }
     </style>
 </head>
 <body>
-    <h1>Infrastructure / SRE Intern Assignment</h1>
-    <p><strong>Candidate Name:</strong> Swarnadipta Das</p>
-    <p><strong>GitHub Repository:</strong> <a href="https://github.com/SwarnadiptaDas/incident-management-system" class="link">https://github.com/SwarnadiptaDas/incident-management-system</a></p>
-
-    <div class="highlight">
-        <strong>Mission Objective:</strong> Build a resilient, production-ready Incident Management System (IMS) designed to monitor a complex distributed stack and manage failure mediation workflows.
+    <div class="header">
+        <h1>Sentinel-IMS: Production Prototype</h1>
+        <div class="candidate-info">
+            <span>Swarnadipta Das</span>
+            <span>SRE Intern Assignment</span>
+        </div>
+        <a href="https://github.com/SwarnadiptaDas/incident-management-system" class="repo-link">View GitHub Repository</a>
     </div>
 
-    <h2>1. Technical Architecture</h2>
-    <p>The system is built on a distributed architecture using a <strong>Async Worker Model</strong> to handle high-throughput signal ingestion (10,000+ signals/sec).</p>
+    <h2>1. The Vision</h2>
+    <p>
+        Sentinel-IMS is a distributed incident management system engineered for <strong>extreme reliability</strong>. It doesn't just store logs; it proactively manages the incident lifecycle using mission-critical architecture patterns.
+    </p>
+
+    <div class="pillar-grid">
+        <div class="pillar-card">
+            <h3>🚀 High-Throughput Ingestion</h3>
+            <p>Utilizes Redis-backed buffering and <strong>Async Backpressure Handling</strong> to sustain bursts of 10,000 signals/sec without API degradation.</p>
+        </div>
+        <div class="pillar-card">
+            <h3>🧩 Atomic Debouncing</h3>
+            <p>Implements a <strong>Strict 10s Window</strong> to merge duplicate signals into single Work Items, preventing database storms and alert fatigue.</p>
+        </div>
+        <div class="pillar-card">
+            <h3>🏗️ Multi-Store Persistence</h3>
+            <p>Hybrid storage architecture: <strong>PostgreSQL</strong> for transactional state, <strong>MongoDB</strong> for high-volume audit logs, and <strong>Redis</strong> for real-time aggregation.</p>
+        </div>
+        <div class="pillar-card">
+            <h3>🛡️ Pattern-Driven Logic</h3>
+            <p>Full implementation of the <strong>State Pattern</strong> for lifecycle safety and the <strong>Strategy Pattern</strong> for severity-based alerting logic.</p>
+        </div>
+    </div>
+
+    <h2>2. Advanced SRE Observability</h2>
+    <p>
+        Beyond basic logs, the system provides deep visibility into its internal health and data throughput.
+    </p>
+    <ul>
+        <li><strong>Deep Health Metrics:</strong> Monitoring active connections for Postgres, Mongo, and Redis clusters.</li>
+        <li><strong>Time-Series stats:</strong> Minutely signal aggregation per component for immediate capacity planning.</li>
+        <li><strong>Structured Telemetry:</strong> Real-time logging of signals/sec and buffer depth in the worker engine.</li>
+    </ul>
+
+    <h2>3. Architecture Diagram</h2>
     <pre>
-  [ High-Volume Signals ] 
+  [ High-Volume Signals ] (10k/sec)
             |
             v
-    +-------------------+
-    |   FastAPI Ingest  | ----> [ Redis Buffer Queue ]
-    +-------------------+               |
-                                        v
-                                +------------------+
-                                |  Async Workers   |
-                                +------------------+
-                                 /       |        \
-          (State Pattern)       /        |         \   (Strategy Pattern)
-         [ PostgreSQL ] <------+   [ MongoDB ]      +----> [ Alerting ]
-       (Work Items/RCA)          (Raw Signals)          (P0/P1/P2)
+    +-------------------+      +-------------------+
+    |   Sentinel API    | ---> |  Redis Ingestion  |
+    |   (FastAPI/uvloop)|      |  (Buffer Queue)   |
+    +-------------------+      +-------------------+
+                                       |
+                                       v (BRPOP)
+    +-------------------+      +-------------------+
+    |  Workflow Engine  | <--- |  Sentinel Worker  |
+    |  (State Pattern)  |      |  (Async Logic)    |
+    +-------------------+      +-------------------+
+             |                         |
+             v                         v
+    +-------------------+      +-------------------+
+    |  PostgreSQL (SoT) |      |  MongoDB (Audit)  |
+    |  (Work Items/RCA) |      |  (Raw Payloads)   |
+    +-------------------+      +-------------------+
     </pre>
 
-    <h2>2. Key SRE Features <span class="badge">BONUS Points</span></h2>
-    <ul>
-        <li><strong>Atomic Debouncing:</strong> Implemented using Redis TTL windows (10s) to collapse 100+ identical signals into a single actionable Work Item.</li>
-        <li><strong>Backpressure Handling:</strong> Decoupled ingestion API from processing using a Redis List as a high-speed buffer.</li>
-        <li><strong>Database Separation:</strong> 
-            <ul>
-                <li><strong>PostgreSQL:</strong> Transactional Source of Truth for incidents and RCAs.</li>
-                <li><strong>MongoDB:</strong> Schema-less Data Lake for long-term raw signal audit logs.</li>
-                <li><strong>Redis:</strong> In-memory buffer and real-time aggregation engine.</li>
-            </ul>
-        </li>
-        <li><strong>Design Patterns:</strong>
-            <ul>
-                <li><strong>State Pattern:</strong> Strictly manages incident lifecycles (OPEN -> INVESTIGATING -> RESOLVED -> CLOSED).</li>
-                <li><strong>Strategy Pattern:</strong> Dynamically routes alerts (P0, P1, P2) through interchangeable notification logic.</li>
-            </ul>
-        </li>
-    </ul>
-
-    <h2>3. Security & Observability</h2>
-    <ul>
-        <li><strong>Rate Limiting:</strong> Redis-backed sliding window rate limiting at the API layer.</li>
-        <li><strong>Deep Health Monitoring:</strong> Custom <code>/health</code> endpoint monitors status for Postgres, Mongo, and Redis.</li>
-        <li><strong>Minutely Aggregation:</strong> Real-time timeseries tracking of signal frequency per component.</li>
-    </ul>
-
-    <h2>4. How to Run</h2>
-    <p>The entire stack is containerized using Docker Compose:</p>
-    <pre>docker compose up --build</pre>
-    <p>Dashboard: <code>http://localhost:5173</code></p>
+    <h2>4. Deployment Checklist <span class="badge">Verified</span></h2>
+    <p>The entire system is orchestrated via Docker Compose for a consistent, "Single Command" environment:</p>
+    <code>docker compose up --build -d</code>
 
     <div class="footer">
-        Submitted on May 1, 2026 | Swarnadipta Das | SRE Intern Assignment
+        © 2026 Swarnadipta Das | Engineering Challenge: Mission-Critical IMS
     </div>
 </body>
 </html>

@@ -1,55 +1,109 @@
-# Mission-Critical Incident Management System (IMS)
+# Sentinel-IMS: Distributed Incident Management System
 
-A production-grade, distributed SRE system built for high-throughput signal processing, atomic debouncing, and strict workflow enforcement.
+[![SRE-Ready](https://img.shields.io/badge/SRE-Ready-blue?style=for-the-badge)](https://github.com/SwarnadiptaDas/incident-management-system)
+[![Architecture-Distributed](https://img.shields.io/badge/Architecture-Distributed-orange?style=for-the-badge)](https://github.com/SwarnadiptaDas/incident-management-system)
 
-## 🏗️ Architecture Overview
+**Sentinel-IMS** is a production-grade, mission-critical incident management engine designed to handle extreme ingestion bursts (10k+ signals/sec) while maintaining strict transactional integrity and observability.
+
+---
+
+## 🏗️ High-Level Architecture
+
+The system utilizes a **Decoupled Async Architecture** to separate high-frequency signal ingestion from complex business logic and persistence.
 
 ```text
-  [ High-Volume Signals ] (10k/sec)
-            |
-            v
-    +-------------------+
-    |   FastAPI Ingest  | ----> [ Redis Buffer Queue ]
-    +-------------------+               |
-                                        v
-                                +------------------+
-                                |  Async Workers   |
-                                +------------------+
-                                 /       |        \
-          (State Pattern)       /        |         \   (Strategy Pattern)
-         [ PostgreSQL ] <------+   [ MongoDB ]      +----> [ Alerting ]
-       (Work Items/RCA)          (Raw Signals)          (P0/P1/P2)
+                                [ EXTERNAL STACK ]
+                               (APIs, DBs, Cache)
+                                       |
+                                       v (10k signals/sec)
+    +-------------------+      +-------------------+
+    |   Sentinel API    | ---> |  Redis Ingestion  |
+    |   (FastAPI/uvloop)|      |  (Buffer Queue)   |
+    +-------------------+      +-------------------+
+                                       |
+                                       v (BRPOP)
+    +-------------------+      +-------------------+
+    |  Workflow Engine  | <--- |  Sentinel Worker  |
+    |  (State Pattern)  |      |  (Async Logic)    |
+    +-------------------+      +-------------------+
+             |                         |
+             v                         v
+    +-------------------+      +-------------------+
+    |  PostgreSQL (SoT) |      |  MongoDB (Audit)  |
+    |  (Work Items/RCA) |      |  (Raw Payloads)   |
+    +-------------------+      +-------------------+
 ```
 
-### 1. Backpressure & Scaling
-The system handles bursts of **10,000 signals/sec** using a **Redis-backed async worker model**. The Ingestion API immediately offloads signals to a Redis list (`signals_queue`), allowing the API to remain responsive while workers process data at their own pace.
+---
 
-### 2. Atomic Debouncing
-To prevent incident storms, the worker implements **Strict Debouncing** using a Redis TTL window (10s). 
-- Multiple signals for the same component in the window are grouped into a single transactional Work Item in PostgreSQL.
-- The `signal_count` is incremented atomically, and all raw payloads are linked in MongoDB for auditability.
+## 🛡️ Core Pillars of Resilience
 
-### 3. Design Patterns
-- **State Pattern**: Managed in `backend/patterns.py`. Enforces strict transitions (OPEN -> INVESTIGATING -> RESOLVED -> CLOSED) and mandatory RCA validation.
-- **Strategy Pattern**: Alerting logic is decoupled into `P0AlertStrategy`, `P1AlertStrategy`, etc., allowing for dynamic switching of notification channels based on severity.
+### 1. High-Throughput & Backpressure
+Sentinel-IMS leverages **Redis as a shock absorber**. When a failure storm occurs, signals are buffered in a high-speed list, allowing the API to remain responsive while the workers consume data at an optimal pace.
 
-### 4. Database Separation (Production Standard)
-- **PostgreSQL**: Transactional storage for Work Items, RCAs, and relational metadata.
-- **MongoDB**: Schema-less Data Lake for long-term audit logs and raw signal payloads.
-- **Redis**: In-memory buffer for backpressure handling and real-time minutely aggregations.
+### 2. Atomic Debouncing (Strict Windowing)
+To prevent "Alert Fatigue" and DB locking, the system implements a **10-second Atomic Debouncing Window**.
+- Multiple identical signals are collapsed into a **single Work Item**.
+- A `signal_count` is incremented atomically to track the error density.
+- All raw signal payloads are persisted in the **NoSQL Data Lake** for post-mortem analysis.
 
-### 5. Security & Reliability (Bonus Features)
-- **Rate Limiting**: Implemented at the API layer using Redis sliding window counters to prevent ingestion DoS attacks.
-- **Deep Health Observability**: Custom `/health` endpoint checks the operational status of all three databases and the worker connectivity.
-- **Data Lake Integrity**: Raw signals are stored in MongoDB with work_item_id mapping, ensuring a complete audit trail even after incidents are closed.
-- **Performance**: Optimized with `uvloop` (high-performance C-based event loop) and sequential worker processing to ensure debouncing atomicity.
+### 3. Design Pattern Excellence
+- **State Pattern**: Enforces a strict lifecycle (OPEN → INVESTIGATING → RESOLVED → CLOSED). It prevents invalid transitions and mandates RCA details before an incident can be archived.
+- **Strategy Pattern**: Decouples alerting logic. Based on severity (P0-P3), the engine dynamically switches between immediate paging, Slack notifications, or simple logging.
 
-## 🚀 Deployment
+### 4. Deep Observability
+- **Minutely Aggregation**: Real-time timeseries tracking of signal frequency per component.
+- **Health Engine**: A comprehensive `/health` endpoint that monitors the heartbeat of PostgreSQL, MongoDB, Redis, and Worker connectivity.
 
+---
+
+## 🔌 API Reference
+
+### Signal Ingestion
+`POST /api/signals`
+```json
+{
+  "component_id": "rdbms_cluster_01",
+  "error": "Connection Timeout",
+  "severity": "P0"
+}
+```
+
+### Metrics & Aggregation
+`GET /api/metrics/{component_id}`
+Returns minutely throughput data for the specified component.
+
+---
+
+## 🚀 Deployment Guide
+
+### Prerequisites
+- Docker & Docker Compose
+- Ubuntu WSL (Recommended for native performance)
+
+### Fast Launch
 ```bash
-docker compose up --build
+# Clone the repository
+git clone https://github.com/SwarnadiptaDas/incident-management-system.git
+cd incident-management-system
+
+# Launch the entire stack
+docker compose up --build -d
 ```
 
-- **Dashboard**: `http://localhost:5173`
-- **Health (SRE View)**: `http://localhost:8000/health`
-- **API Docs**: `http://localhost:8000/docs`
+### Dashboards
+- **Monitoring Portal**: `http://localhost:5173`
+- **SRE Health View**: `http://localhost:8000/health`
+- **Interactive API Docs**: `http://localhost:8000/docs`
+
+---
+
+## 🧪 Simulation
+To test the resilience under load, run the provided simulation script:
+```bash
+python3 simulate_signals.py
+```
+This script triggers multiple failure scenarios across the stack to demonstrate debouncing and state management.
+
+---
+**Developed with 💙 for SRE & Infrastructure Excellence.**
