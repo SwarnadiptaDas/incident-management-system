@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submission: Swarnadipta Das - Infrastructure / SRE Intern Assignment</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 40px auto; padding: 0 20px; }
+        h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #2980b9; margin-top: 30px; }
+        .highlight { background: #f1f8ff; border-left: 4px solid #3498db; padding: 15px; margin: 20px 0; }
+        code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; font-family: 'Courier New', Courier, monospace; }
+        pre { background: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 0.9em; }
+        .footer { margin-top: 50px; font-size: 0.8em; color: #7f8c8d; text-align: center; border-top: 1px solid #eee; padding-top: 20px; }
+        .link { color: #3498db; font-weight: bold; text-decoration: none; }
+        .badge { display: inline-block; background: #e74c3c; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Infrastructure / SRE Intern Assignment</h1>
+    <p><strong>Candidate Name:</strong> Swarnadipta Das</p>
+    <p><strong>GitHub Repository:</strong> <a href="https://github.com/SwarnadiptaDas/incident-management-system" class="link">https://github.com/SwarnadiptaDas/incident-management-system</a></p>
+
+    <div class="highlight">
+        <strong>Mission Objective:</strong> Build a resilient, production-ready Incident Management System (IMS) designed to monitor a complex distributed stack and manage failure mediation workflows.
+    </div>
+
+    <h2>1. Technical Architecture</h2>
+    <p>The system is built on a distributed architecture using a <strong>Async Worker Model</strong> to handle high-throughput signal ingestion (10,000+ signals/sec).</p>
+    <pre>
+  [ High-Volume Signals ] 
+            |
+            v
+    +-------------------+
+    |   FastAPI Ingest  | ----> [ Redis Buffer Queue ]
+    +-------------------+               |
+                                        v
+                                +------------------+
+                                |  Async Workers   |
+                                +------------------+
+                                 /       |        \
+          (State Pattern)       /        |         \   (Strategy Pattern)
+         [ PostgreSQL ] <------+   [ MongoDB ]      +----> [ Alerting ]
+       (Work Items/RCA)          (Raw Signals)          (P0/P1/P2)
+    </pre>
+
+    <h2>2. Key SRE Features <span class="badge">BONUS Points</span></h2>
+    <ul>
+        <li><strong>Atomic Debouncing:</strong> Implemented using Redis TTL windows (10s) to collapse 100+ identical signals into a single actionable Work Item.</li>
+        <li><strong>Backpressure Handling:</strong> Decoupled ingestion API from processing using a Redis List as a high-speed buffer.</li>
+        <li><strong>Database Separation:</strong> 
+            <ul>
+                <li><strong>PostgreSQL:</strong> Transactional Source of Truth for incidents and RCAs.</li>
+                <li><strong>MongoDB:</strong> Schema-less Data Lake for long-term raw signal audit logs.</li>
+                <li><strong>Redis:</strong> In-memory buffer and real-time aggregation engine.</li>
+            </ul>
+        </li>
+        <li><strong>Design Patterns:</strong>
+            <ul>
+                <li><strong>State Pattern:</strong> Strictly manages incident lifecycles (OPEN -> INVESTIGATING -> RESOLVED -> CLOSED).</li>
+                <li><strong>Strategy Pattern:</strong> Dynamically routes alerts (P0, P1, P2) through interchangeable notification logic.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h2>3. Security & Observability</h2>
+    <ul>
+        <li><strong>Rate Limiting:</strong> Redis-backed sliding window rate limiting at the API layer.</li>
+        <li><strong>Deep Health Monitoring:</strong> Custom <code>/health</code> endpoint monitors status for Postgres, Mongo, and Redis.</li>
+        <li><strong>Minutely Aggregation:</strong> Real-time timeseries tracking of signal frequency per component.</li>
+    </ul>
+
+    <h2>4. How to Run</h2>
+    <p>The entire stack is containerized using Docker Compose:</p>
+    <pre>docker compose up --build</pre>
+    <p>Dashboard: <code>http://localhost:5173</code></p>
+
+    <div class="footer">
+        Submitted on May 1, 2026 | Swarnadipta Das | SRE Intern Assignment
+    </div>
+</body>
+</html>
