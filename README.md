@@ -38,6 +38,12 @@ To prevent incident storms, the worker implements **Strict Debouncing** using a 
 - **MongoDB**: Schema-less Data Lake for long-term audit logs and raw signal payloads.
 - **Redis**: In-memory buffer for backpressure handling and real-time minutely aggregations.
 
+### 5. Security & Reliability (Bonus Features)
+- **Rate Limiting**: Implemented at the API layer using Redis sliding window counters to prevent ingestion DoS attacks.
+- **Deep Health Observability**: Custom `/health` endpoint checks the operational status of all three databases and the worker connectivity.
+- **Data Lake Integrity**: Raw signals are stored in MongoDB with work_item_id mapping, ensuring a complete audit trail even after incidents are closed.
+- **Performance**: Optimized with `uvloop` (high-performance C-based event loop) and sequential worker processing to ensure debouncing atomicity.
+
 ## 🚀 Deployment
 
 ```bash
